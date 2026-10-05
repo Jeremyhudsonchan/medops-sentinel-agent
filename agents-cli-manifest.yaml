@@ -1,0 +1,63 @@
+# Gemini Enterprise Agent Platform Manifest (generated & managed via agents-cli)
+apiVersion: agents.cloud.google.com/v1alpha1
+kind: AgentManifest
+metadata:
+  name: medops-sentinel-agent
+  displayName: "MedOps Sentinel — Smart Healthcare & Biomedical Asset Ops Agent"
+  description: "Multi-agent clinical triage and biomedical device operations coordinator with HITL approval hooks, Model Armor guardrails, PII/PHI redaction, and Firestore session memory."
+  labels:
+    track: "agents-for-good-enterprise"
+    domain: "healthcare-biomed-ops"
+    framework: "google-adk"
+spec:
+  entrypoint: "app.agent:root_agent"
+  runtime:
+    pythonVersion: "3.11"
+    region: "us-east4"
+    scaling:
+      minInstances: 1
+      maxInstances: 10
+      concurrency: 80
+  models:
+    fastRoutingModel: "gemini-2.5-flash"
+    complexReasoningModel: "gemini-2.5-pro"
+    judgeEvaluationModel: "gemini-2.5-flash"
+  memory:
+    sessionStore:
+      provider: "agent-runtime-sessions"
+      firestoreCollection: "medops_agent_sessions"
+      historyCompaction:
+        enabled: true
+        maxTurnsWindow: 12
+        maxTokenBudget: 8000
+    memoryBank:
+      enabled: true
+      asyncExtractionCallback: "app.memory:trigger_async_memory_consolidation"
+      firestoreCollection: "medops_agent_memories"
+      piiRedactionBeforeWrite: true
+  governance:
+    agentIdentity:
+      spiffeEnabled: true
+      leastPrivilegeRoles:
+        - "roles/datastore.user"
+        - "roles/secretmanager.secretAccessor"
+        - "roles/cloudtrace.agent"
+        - "roles/logging.logWriter"
+        - "roles/aiplatform.user"
+    modelArmor:
+      enabled: true
+      floorSettingsEnforcement: "INSPECT_AND_BLOCK"
+      promptInjectionProtection: true
+      piiFilterEnabled: true
+    humanInTheLoop:
+      enabled: true
+      protectedTools:
+        - "decommission_and_replace_medical_device"
+        - "authorize_high_risk_clinical_intervention"
+  observability:
+    structuredLogging: true
+    openTelemetryTracing: true
+    intentOutcomeAudit: true
+  evaluation:
+    evalSetPath: "eval/medops_eval_set.json"
+    evalConfigPath: "eval/eval_config.json"

@@ -1,0 +1,12 @@
+.venv/
+venv/
+.uv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.adk/
+.env
+.git/
+terraform/
+tests/

@@ -1,0 +1,39 @@
+name: MedOps Sentinel AgentOps CI & Evaluation Pipeline
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+
+jobs:
+  test-and-evaluate:
+    name: Run Rubric Unit Tests & Golden Eval Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv and project dependencies
+        run: |
+          pip install uv
+          uv pip install --system -e ".[dev]"
+
+      - name: Execute deterministic unit & rubric verification suite
+        run: |
+          pytest -v
+
+      - name: Execute Golden Dataset Evaluation Harness
+        run: |
+          python3 -m eval.run_evaluation_harness
+
+      - name: Validate Terraform Infrastructure as Code
+        uses: hashicorp/setup-terraform@v3
+      - name: Terraform Format Check
+        working-directory: ./terraform
+        run: terraform fmt -check

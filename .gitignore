@@ -1,0 +1,28 @@
+# Python bytecode & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.uv/
+dist/
+build/
+*.egg-info/
+
+# Environment variables and secrets (NEVER commit credentials)
+.env
+*.pem
+*.key
+service-account*.json
+
+# Terraform state & local provider cache
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/tfplan
+
+# Test & coverage caches
+.pytest_cache/
+.coverage
+htmlcov/
+.adk/
